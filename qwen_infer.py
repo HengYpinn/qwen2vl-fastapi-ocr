@@ -1,0 +1,57 @@
+from transformers import AutoProcessor
+from models.qwen2_vl import Qwen2VLForConditionalGeneration
+import torch
+from qwen_vl_utils import process_vision_info  # Make sure this is installed
+import warnings
+
+# Suppress warnings for cleaner output
+warnings.filterwarnings("ignore")
+
+# Load model and processor once during startup
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
+model = Qwen2VLForConditionalGeneration.from_pretrained(
+    "Qwen/Qwen2-VL-2B-Instruct",
+    torch_dtype="auto",
+    device_map="auto"
+)
+
+def extract_info_from_image(image):
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "image", "image": image},
+                {"type": "text", "text": "Extract important fields such as name, IC number, date of birth, address, or receipt info from this document in JSON format."}
+            ]
+        }
+    ]
+
+    # Apply prompt template
+    prompt_text = processor.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
+
+    # Prepare inputs for vision model
+    image_inputs, video_inputs = process_vision_info(messages)
+
+    inputs = processor(
+        text=[prompt_text],
+        images=image_inputs,
+        videos=video_inputs,
+        padding=True,
+        return_tensors="pt"
+    ).to("cuda")
+
+    # Generate output
+    generated_ids = model.generate(**inputs, max_new_tokens=128)
+    generated_ids_trimmed = [
+        out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+    ]
+
+    decoded_output = processor.batch_decode(
+        generated_ids_trimmed,
+        skip_special_tokens=True,
+        clean_up_tokenization_spaces=True
+    )
+
+    return decoded_output[0]

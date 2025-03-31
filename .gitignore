@@ -1,0 +1,32 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# PyCharm settings
+.idea/
+
+# VSCode settings
+.vscode/
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# OS / Desktop system files
+.DS_Store
+Thumbs.db
+
+# Uploaded files and logs
+uploads/
+*.log
+
+# Environment files
+.env
+
+# Python egg info
+*.egg-info/
+dist/
+build/

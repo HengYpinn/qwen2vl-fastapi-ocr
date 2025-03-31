@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pillow
+pdf2image
+pymongo
+numpy
+torch
+transformers @ git+https://github.com/huggingface/transformers
+accelerate @ git+https://github.com/huggingface/accelerate
+qwen-vl-utils
