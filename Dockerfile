@@ -4,8 +4,8 @@ FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
 # Set work directory
 WORKDIR /app
 
-# Install dependencies
 RUN apt-get update && apt-get install -y \
+    git \
     poppler-utils \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
