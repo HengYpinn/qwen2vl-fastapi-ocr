@@ -1,5 +1,4 @@
-from transformers import AutoProcessor
-from models.qwen2_vl import Qwen2VLForConditionalGeneration
+from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
 import torch
 from qwen_vl_utils import process_vision_info  # Make sure this is installed
 import warnings
