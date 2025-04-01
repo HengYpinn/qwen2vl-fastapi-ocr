@@ -6,7 +6,8 @@
 - Saves original files and extracted text into MongoDB
 
 ## 🧰 Requirements
-- Docker Desktop
+- Docker
+- Docker Compose
 - NVIDIA GPU with CUDA drivers installed
 
 ## 🚀 Quick Start (Using Docker Compose)

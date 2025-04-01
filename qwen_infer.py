@@ -20,7 +20,10 @@ def extract_info_from_image(image):
             "role": "user",
             "content": [
                 {"type": "image", "image": image},
-                {"type": "text", "text": "Extract important fields such as name, IC number, date of birth, address, or receipt info from this document in JSON format."}
+                {
+                    "type": "text",
+                    "text": "Analyze the image and respond with key information in RESTful API JSON format. If the image is a Malaysian IC, extract: fullName, icNumber, address, nationality, and gender. If it is a receipt, extract: date, referenceNumber, totalAmount, and any other relevant fields. For any other image type, intelligently identify and return any important fields you find useful."
+                }
             ]
         }
     ]
