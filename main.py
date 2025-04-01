@@ -83,6 +83,6 @@ def get_documents():
             "document_id": str(d["_id"]),
             "filename": d["filename"],
             "upload_time": d["upload_time"],
-            "extracted_text_preview": d["extracted_text"][:100],
+            "extracted_text_preview": str(d["extracted_text"])[:100],
         })
     return results
