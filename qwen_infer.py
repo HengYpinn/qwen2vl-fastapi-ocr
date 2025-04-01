@@ -2,6 +2,8 @@ from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoPro
 import torch
 from qwen_vl_utils import process_vision_info  # Make sure this is installed
 import warnings
+import re
+import json
 
 # Suppress warnings for cleaner output
 warnings.filterwarnings("ignore")
@@ -56,4 +58,13 @@ def extract_info_from_image(image):
         clean_up_tokenization_spaces=True
     )
 
-    return decoded_output[0]
+    raw_text = decoded_output[0]
+    # Remove markdown code block formatting like ```json ... ```
+    cleaned = re.sub(r"```json|```", "", raw_text).strip()
+
+    try:
+        parsed_output = json.loads(cleaned)
+    except json.JSONDecodeError:
+        parsed_output = {"error": "Failed to parse model output", "raw": raw_text}
+
+    return parsed_output
