@@ -6,7 +6,9 @@ pymongo
 numpy
 torch
 transformers==4.35.0
-accelerate @ git+https://github.com/huggingface/accelerate
+accelerate==0.17.4
+huggingface-hub==0.17.4
+tokenizers==0.14.1
 bitsandbytes
 safetensors
 python-multipart
