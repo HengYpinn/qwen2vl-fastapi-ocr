@@ -5,7 +5,7 @@ pdf2image
 pymongo
 numpy
 torch
-transformers @ git+https://github.com/huggingface/transformers
+transformers==4.35.0
 accelerate @ git+https://github.com/huggingface/accelerate
 bitsandbytes
 safetensors
