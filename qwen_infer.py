@@ -1,70 +1,70 @@
-from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
-import torch
-from qwen_vl_utils import process_vision_info  # Make sure this is installed
 import warnings
 import re
 import json
+import torch
+from PIL import Image
+from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 
-# Suppress warnings for cleaner output
+# suppress warnings for cleaner output
 warnings.filterwarnings("ignore")
 
-# Load model and processor once during startup
+# 1. Load processor and model once at import time, in 8-bit to save GPU memory
 processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
 model = Qwen2VLForConditionalGeneration.from_pretrained(
     "Qwen/Qwen2-VL-2B-Instruct",
-    torch_dtype="auto",
-    device_map="auto"
+    device_map="auto",
+    load_in_8bit=True,
+    torch_dtype=torch.float16
 )
 
-def extract_info_from_image(image):
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {"type": "image", "image": image},
-                {
-                    "type": "text",
-                    "text": "Analyze the image and respond with key information in RESTful API JSON format. If the image is a Malaysian IC, extract: fullName, icNumber, address, nationality, and gender. If it is a receipt, extract: date, referenceNumber, totalAmount, and any other relevant fields. For any other image type, intelligently identify and return any important fields you find useful."
-                }
-            ]
-        }
-    ]
+def _normalize_image_for_model(pil_img: Image.Image, max_dim: int = 1200) -> Image.Image:
+    """
+    Downscale any dimension above max_dim, preserving aspect ratio.
+    This keeps incoming images at or above the model’s native resolution
+    but avoids huge GPU allocations.
+    """
+    w, h = pil_img.size
+    if max(w, h) > max_dim:
+        pil_img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+    return pil_img
 
-    # Apply prompt template
-    prompt_text = processor.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=True
-    )
+def _parse_json_from_string(raw: str) -> dict:
+    """
+    Strip Markdown fences and parse JSON. On failure, return an error structure.
+    """
+    cleaned = re.sub(r"```json|```", "", raw).strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse model output", "raw": raw}
 
-    # Prepare inputs for vision model
-    image_inputs, video_inputs = process_vision_info(messages)
+def extract_info_from_image(pil_img: Image.Image, prompt_text: str) -> dict:
+    """
+    Run the vision-language model on a single PIL image with a custom prompt.
+    Handles resizing, inference, and memory cleanup to avoid OOM.
+    """
+    # 1) Downscale large images to save memory
+    pil_img = _normalize_image_for_model(pil_img, max_dim=1200)
 
+    # 2) Prepare the inputs
     inputs = processor(
         text=[prompt_text],
-        images=image_inputs,
-        videos=video_inputs,
+        images=[pil_img],
         padding=True,
         return_tensors="pt"
-    ).to("cuda")
+    ).to(model.device)
 
-    # Generate output
-    generated_ids = model.generate(**inputs, max_new_tokens=128)
-    generated_ids_trimmed = [
-        out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-    ]
+    # 3) Generate with a reasonable token limit
+    with torch.no_grad():
+        generated = model.generate(**inputs, max_new_tokens=128)
 
-    decoded_output = processor.batch_decode(
-        generated_ids_trimmed,
-        skip_special_tokens=True,
-        clean_up_tokenization_spaces=True
-    )
+    # 4) Trim off the prompt’s tokens and decode
+    prompt_len = inputs.input_ids.shape[-1]
+    gen_ids = generated[0][prompt_len:]
+    decoded = processor.batch_decode([gen_ids], skip_special_tokens=True)[0]
 
-    raw_text = decoded_output[0]
-    # Remove markdown code block formatting like ```json ... ```
-    cleaned = re.sub(r"```json|```", "", raw_text).strip()
+    # 5) Free up GPU memory immediately
+    torch.cuda.empty_cache()
 
-    try:
-        parsed_output = json.loads(cleaned)
-    except json.JSONDecodeError:
-        parsed_output = {"error": "Failed to parse model output", "raw": raw_text}
-
-    return parsed_output
+    # 6) Parse JSON from the model’s output
+    return _parse_json_from_string(decoded)
