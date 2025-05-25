@@ -4,11 +4,11 @@ pillow
 pdf2image
 pymongo
 numpy
-torch
-transformers==4.35.0
-accelerate==0.20.3
-huggingface-hub==0.17.3
-tokenizers==0.14.1
-bitsandbytes
-safetensors
+torch                        # install your CUDA‐enabled wheel separately, e.g. via --index-url
+transformers==4.49.0         # Qwen2-VL support was added by v4.47.1 and works on 4.49.0
+accelerate==0.21.0           # >=0.20.3 required by Transformers 4.49.0
+huggingface-hub==0.17.3      # >=0.16.4,<1.0 required by tokenizers & transformers
+tokenizers==0.14.1           # matches transformers 4.49.0
+bitsandbytes                 # for 8-bit quantization
+safetensors                 # faster/safe model weights format
 python-multipart
