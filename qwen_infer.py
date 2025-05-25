@@ -1,6 +1,5 @@
 import warnings
-import re
-import json
+import re, json
 import torch
 from PIL import Image
 from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
@@ -15,55 +14,54 @@ model = Qwen2VLForConditionalGeneration.from_pretrained(
     torch_dtype=torch.float16
 )
 
-def _normalize_image_for_model(pil_img: Image.Image, max_dim: int = 1200) -> Image.Image:
-    w, h = pil_img.size
-    if max(w, h) > max_dim:
-        pil_img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
-    return pil_img
+def _normalize_image(img: Image.Image, max_dim=1200) -> Image.Image:
+    if max(img.size) > max_dim:
+        img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+    return img
 
-def _parse_json_from_string(raw: str) -> dict:
+def _parse_json(raw: str) -> dict:
     cleaned = re.sub(r"```json|```", "", raw).strip()
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError:
-        return {"error": "Failed to parse model output", "raw": raw}
+        return {"error": "parse_failed", "raw": raw}
 
-def extract_info_from_image(pil_img: Image.Image, prompt_text: str) -> dict:
-    """
-    Run Qwen2-VL on a single PIL image plus a text prompt,
-    using apply_chat_template to align image tokens and features.
-    """
-    pil_img = _normalize_image_for_model(pil_img, max_dim=1200)
+def extract_info_from_image(img: Image.Image, prompt: str) -> dict:
+    img = _normalize_image(img)
 
-    # 1) Build a single-user “conversation” with image + text
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {"type": "image", "image": pil_img},
-                {"type": "text",  "text": prompt_text}
-            ],
-        }
-    ]
+    messages = [{
+        "role": "user",
+        "content": [
+            {"type": "image", "image": img},
+            {"type": "text",  "text": prompt}
+        ]
+    }]
 
-    # 2) Apply the chat template so input_ids include <image> tokens
+    # inject <image> tokens
     inputs = processor.apply_chat_template(
         messages,
         add_generation_prompt=True,
         tokenize=True,
-        return_dict=True,
-        return_tensors="pt"
+        return_tensors="pt",
+        return_dict=True
     ).to(model.device)
 
-    # 3) Generate the response
+    # (optional) debug print
+    # print("# image tokens:", (inputs.input_ids == processor.tokenizer.image_token_id).sum().item())
+
     with torch.no_grad():
-        output_ids = model.generate(**inputs, max_new_tokens=128)
+        output_ids = model.generate(
+            **inputs,
+            max_new_tokens=128,
+            temperature=0.0,
+            do_sample=False,
+            num_beams=4,
+            eos_token_id=processor.tokenizer.eos_token_id
+        )
 
-    # 4) Trim off prompt tokens and decode
-    prompt_len  = inputs.input_ids.shape[-1]
-    gen_ids     = output_ids[0, prompt_len:]
-    decoded     = processor.batch_decode([gen_ids], skip_special_tokens=True)[0]
+    prompt_len = inputs.input_ids.shape[-1]
+    gen_ids    = output_ids[0, prompt_len:]
+    raw_txt    = processor.batch_decode([gen_ids], skip_special_tokens=True)[0]
 
-    # 5) Free memory and parse JSON
     torch.cuda.empty_cache()
-    return _parse_json_from_string(decoded)
+    return _parse_json(raw_txt)
