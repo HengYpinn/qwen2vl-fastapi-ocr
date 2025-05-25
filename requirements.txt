@@ -5,15 +5,11 @@ pdf2image==1.17.0
 pymongo==4.13.0
 numpy==1.26.0
 torch>=2.1.0
-# Use the dev commit that includes Qwen2VLForConditionalGeneration support
-transformers @ git+https://github.com/huggingface/transformers@21fac7abba2a37fae86106f87fcf9974fd1e3830  #
-# Trainer/inference requires accelerate ≥0.20.3
-accelerate>=0.20.3          # :contentReference[oaicite:1]{index=1}
-# Ensure a compatible HF Hub and tokenizers
-huggingface-hub>=0.26.0,<1.0
-tokenizers>=0.16.0,<0.17
-# Vision-language utilities toolkit (latest on PyPI)
+transformers==4.48.3
+accelerate>=0.20.3
+huggingface-hub>=0.14.1,<1.0
+tokenizers>=0.14.1,<0.15
 qwen-vl-utils==0.0.11
-safetensors>=0.5.3
 bitsandbytes>=0.45.5
+safetensors>=0.5.3
 python-multipart>=0.0.20
