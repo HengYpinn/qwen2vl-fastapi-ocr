@@ -2,16 +2,7 @@
 
 PROMPTS = {
     "ic": (
-        "Input: a photograph of a Malaysian Identity Card.\n"
-        "Task: Extract exactly these fields as JSON:\n"
-        "  \"fullName\": string,\n"
-        "  \"icNumber\": string,\n"
-        "  \"address\": string,\n"
-        "  \"nationality\": string,\n"
-        "  \"gender\": string,\n"
-        "Then assess authenticity and include:\n"
-        "  \"authenticityConfidence\": float  (0.0=fake, 1.0=real)\n"
-        "Output: Valid JSON only. No markdown, no prose, no explanations.\n"
+        "Analyze the image and respond with key information in RESTful API JSON format. If the image is a Malaysian IC, extract: fullName, icNumber, address, nationality, and gender."
     ),
 
     "passport": (
