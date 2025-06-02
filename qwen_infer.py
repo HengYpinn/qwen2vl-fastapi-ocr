@@ -8,11 +8,11 @@ from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 warnings.filterwarnings("ignore")
 
 # 1) Load processor + full-precision model
-processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
 model = Qwen2VLForConditionalGeneration.from_pretrained(
-    "Qwen/Qwen2-VL-2B-Instruct",
+    "Qwen/Qwen2-VL-7B-Instruct",
     device_map="auto",
-    torch_dtype=torch.float16
+    load_in_8bit=True
 )
 
 def _normalize_image_for_model(pil_img: Image.Image, max_dim: int = 1200) -> Image.Image:
