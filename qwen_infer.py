@@ -8,9 +8,9 @@ from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 warnings.filterwarnings("ignore")
 
 # 1) Load processor + full-precision model
-processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
 model = Qwen2VLForConditionalGeneration.from_pretrained(
-    "Qwen/Qwen2-VL-7B-Instruct",
+    "Qwen/Qwen2-VL-2B-Instruct",
     device_map="auto"
 )
 
@@ -71,7 +71,7 @@ def extract_info_from_image(pil_img: Image.Image, prompt_text: str) -> dict:
             max_new_tokens=128,
             temperature=0.0,
             do_sample=False,
-            num_beams=4,
+            num_beams=1,
             eos_token_id=processor.tokenizer.eos_token_id
         )
 
