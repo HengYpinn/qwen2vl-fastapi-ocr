@@ -4,7 +4,7 @@ import json
 import torch
 from PIL import Image
 from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
-
+from qwen_vl_utils import process_vision_info
 warnings.filterwarnings("ignore")
 
 # 1) Load processor + full-precision model
@@ -55,30 +55,36 @@ def extract_info_from_image(pil_img: Image.Image, prompt_text: str) -> dict:
         ],
     }]
 
-    # 2) Inject <image> tokens & get tensors
-    inputs = processor.apply_chat_template(
-        messages,
-        add_generation_prompt=True,
-        tokenize=True,
-        return_tensors="pt",
-        return_dict=True
-    ).to(model.device)
+    # Apply prompt template
+    prompt_text = processor.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
 
-    # 3) Generate deterministically to reduce noise
-    with torch.no_grad():
-        output_ids = model.generate(
-            **inputs,
-            max_new_tokens=128,
-            temperature=0.0,
-            do_sample=False,
-            num_beams=1,
-            eos_token_id=processor.tokenizer.eos_token_id
-        )
+    # Prepare inputs for vision model
+    image_inputs, video_inputs = process_vision_info(messages)
 
-    # 4) Strip prompt tokens, decode only the generated portion
-    prompt_len = inputs.input_ids.shape[-1]
-    gen_ids    = output_ids[0, prompt_len:]
-    raw_txt    = processor.batch_decode([gen_ids], skip_special_tokens=True)[0]
+    inputs = processor(
+        text=[prompt_text],
+        images=image_inputs,
+        videos=video_inputs,
+        padding=True,
+        return_tensors="pt"
+    ).to("cuda")
+
+    # Generate output
+    generated_ids = model.generate(**inputs, max_new_tokens=128)
+    generated_ids_trimmed = [
+        out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+    ]
+
+    decoded_output = processor.batch_decode(
+        generated_ids_trimmed,
+        skip_special_tokens=True,
+        clean_up_tokenization_spaces=True
+    )
+
+    raw_text = decoded_output[0]
+
 
     # 5) Free VRAM & parse into a Python dict
     torch.cuda.empty_cache()
