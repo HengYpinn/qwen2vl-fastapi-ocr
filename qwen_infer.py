@@ -88,4 +88,4 @@ def extract_info_from_image(pil_img: Image.Image, prompt_text: str) -> dict:
 
     # 5) Free VRAM & parse into a Python dict
     torch.cuda.empty_cache()
-    return _parse_json_from_string(raw_txt)
+    return _parse_json_from_string(raw_text)
