@@ -1,14 +1,11 @@
-fastapi==0.115.12
-uvicorn[standard]==0.22.0
-pillow==9.4.0
-pdf2image==1.17.0
-pymongo==4.13.0
-numpy==1.26.0
-torch>=2.1.0
-transformers==4.48.3               # Includes Qwen2VLForConditionalGeneration
-accelerate>=0.20.3                 # Required by Transformers’ Trainer/inference
-tokenizers==0.21.1                 # >=0.21,<0.22 required by Transformers 4.48.3
-qwen-vl-utils==0.0.11              # Vision-language utilities for Qwen-VL models
-bitsandbytes>=0.45.5               # 8-bit quantization support :contentReference[oaicite:4]{index=4}
-safetensors>=0.5.3                 # Safe, fast tensor format :contentReference[oaicite:5]{index=5}
-python-multipart>=0.0.20           # Streaming multipart parser for FastAPI uploads :contentReference[oaicite:6]{index=6}
+fastapi
+uvicorn[standard]
+pillow
+pdf2image
+pymongo
+numpy
+torch
+transformers @ git+https://github.com/huggingface/transformers
+accelerate @ git+https://github.com/huggingface/accelerate
+qwen-vl-utils
+python-multipart
