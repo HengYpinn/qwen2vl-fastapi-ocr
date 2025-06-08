@@ -6,7 +6,7 @@ PROMPTS = {
     ),
 
     "passport": (
-        "Extract JSON with keys fullName,countryCode,passportNumber,nationality,nationalId,dateOfBirth,sex,dateOfIssue,dateOfExpiry,issuedBy,blurIntensity(in percentage),glareIntensity(in percentage) from passport scan.Output only JSON."
+        "Extract JSON with keys fullName,countryCode,passportNumber,placeOfBirth,nationalId,dateOfBirth,sex,dateOfIssue,dateOfExpiry,issuedBy,blurIntensity(in percentage),glareIntensity(in percentage) from passport scan.Output only JSON."
     ),
 
     "receipt": (
