@@ -5,7 +5,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from PIL import Image
 from pymongo import MongoClient
-
+from image_quality import compute_blur_intensity, compute_glare_intensity
 from qwen_infer import extract_info_from_image
 from utils.pdf_utils import convert_pdf_to_images
 from prompts import PROMPTS
@@ -54,6 +54,9 @@ def handle_inference(contents: bytes, prompt_key: str):
     results = []
     for idx, img in enumerate(images):
         data = extract_info_from_image(img, prompt)
+        blur = compute_blur_intensity(img)
+        glare = compute_glare_intensity(img)
+        data.update({"blurIntensity": blur, "glareIntensity": glare})
         if len(images) > 1:
             results.append({"page": idx + 1, "data": data})
         else:
@@ -127,10 +130,10 @@ async def extract_passport(file: UploadFile = File(...)):
     return JSONResponse({"status": "success", "document_id": str(doc_id), "results": results})
 
 
-@app.post("/api/receipt")
-async def extract_receipt(file: UploadFile = File(...)):
+@app.post("/api/cash-deposit")
+async def extract_cash_deposit(file: UploadFile = File(...)):
     """
-    Extract fields from a cash deposit or bank transfer receipt.
+    Extract fields from a cash deposit receipt.
     """
     ext = os.path.splitext(file.filename.lower())[1]
     if ext not in ALLOWED_EXTENSIONS:
@@ -143,7 +146,7 @@ async def extract_receipt(file: UploadFile = File(...)):
     with open(saved_path, "wb") as f:
         f.write(contents)
 
-    results = handle_inference(contents, "receipt")
+    results = handle_inference(contents, "cash_deposit")
 
     record = {
         "filename": saved_name,
@@ -156,6 +159,34 @@ async def extract_receipt(file: UploadFile = File(...)):
 
     return JSONResponse({"status": "success", "document_id": str(doc_id), "results": results})
 
+@app.post("/api/bank-transfer")
+async def extract_bank_transfer(file: UploadFile = File(...)):
+    """
+    Extract fields from bank transfer receipt.
+    """
+    ext = os.path.splitext(file.filename.lower())[1]
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(400, "Unsupported file type.")
+    contents = await file.read()
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    saved_name = f"{timestamp}_{file.filename}"
+    saved_path = os.path.join(UPLOAD_DIR, saved_name)
+    with open(saved_path, "wb") as f:
+        f.write(contents)
+
+    results = handle_inference(contents, "bank_transfer")
+
+    record = {
+        "filename": saved_name,
+        "file_path": saved_path,
+        "content_type": file.content_type,
+        "results": results,
+        "upload_time": datetime.now(),
+    }
+    doc_id = collection.insert_one(record).inserted_id
+
+    return JSONResponse({"status": "success", "document_id": str(doc_id), "results": results})
 
 @app.get("/api/documents")
 def list_documents():
