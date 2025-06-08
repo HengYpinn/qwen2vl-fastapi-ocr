@@ -5,8 +5,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from PIL import Image
 from pymongo import MongoClient
-from image_quality import compute_blur_intensity, compute_glare_intensity
 from qwen_infer import extract_info_from_image
+from utils.image_quality import compute_blur_intensity, compute_glare_intensity
 from utils.pdf_utils import convert_pdf_to_images
 from prompts import PROMPTS
 app = FastAPI()
