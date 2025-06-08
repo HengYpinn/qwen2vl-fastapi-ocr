@@ -37,8 +37,7 @@ def handle_inference(contents: bytes, prompt_key: str):
     prompt = PROMPTS[prompt_key]
 
     # Determine images to process
-    if prompt_key == "receipt" and contents[:4] == b"%PDF":
-        # PDF receipts → convert pages to images
+    if contents[:4] == b"%PDF":
         try:
             images = convert_pdf_to_images(contents)
         except Exception as e:

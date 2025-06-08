@@ -2,37 +2,15 @@
 
 PROMPTS = {
     "ic": (
-        "Analyze the image and respond with key information in RESTful API JSON format. If the image is a Malaysian IC, extract: fullName, icNumber, address, nationality, and gender."
+        "Extract JSON with keys cardType,idNumber,name,address,status,religion,gender,expiryDate,documentAuthenticity from Malaysian IC image.expiryDate format DD-MM-YYYY.documentAuthenticity:integer 0–100 representing confidence(%) that the ID is genuine and legible."
     ),
 
     "passport": (
-        "Input: a scan or photo of a passport.\n"
-        "Task: Extract exactly these fields as JSON:\n"
-        "  \"fullName\": string,\n"
-        "  \"passportNumber\": string,\n"
-        "  \"nationality\": string,\n"
-        "  \"dateOfBirth\": string (ISO 8601 date),\n"
-        "  \"expiryDate\": string (ISO 8601 date),\n"
-        "Then assess authenticity and include:\n"
-        "  \"authenticityConfidence\": float  (0.0=fake, 1.0=real)\n"
-        "Output: Valid JSON only. No markdown, no prose, no explanations.\n"
+        "Extract JSON with keys fullName,countryCode,passportNumber,nationality,nationalId,dateOfBirth,sex,dateOfIssue,dateOfExpiry,issuedBy,documentAuthenticity from passport scan.documentAuthenticity:integer 0–100 representing confidence(%) that the ID is genuine and legible."
     ),
 
     "receipt": (
-        "Input: a photo or PDF of a cash-deposit or bank-transfer receipt.\n"
-        "Task: Extract exactly these fields as JSON:\n"
-        "  \"date\": string (ISO 8601 date),\n"
-        "  \"time\": string (HH:MM:SS),\n"
-        "  \"referenceNumber\": string,\n"
-        "  \"totalAmount\": number,\n"
-        "  \"currency\": string (ISO 4217 code),\n"
-        "  \"senderAccountNumber\": string,\n"
-        "  \"senderName\": string,\n"
-        "  \"receiverAccountNumber\": string,\n"
-        "  \"receiverName\": string,\n"
-        "  \"accountType\": string,\n"
-        "  \"transactionType\": string,\n"
-        "  \"branchName\": string\n"
-        "Output: Valid JSON only. No markdown, no prose, no explanations.\n"
+        "Extract JSON with keys: if cash deposit receipt -> date,time,accountNumber,name,total,transactionStatus; "
+        "if bank transfer receipt -> status,date,time,amount,referenceCode,toName,toBank,toAccountLast4,transferType,remarks."
     ),
 }
