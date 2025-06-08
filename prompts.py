@@ -6,7 +6,14 @@ PROMPTS = {
     ),
 
     "passport": (
-        "Extract JSON with keys type,countryCode,passportNumber,fullName,placeOfBirth,nationalId,dateOfBirth,sex,dateOfIssue,dateOfExpiry,issuedBy,authority from passport scan.Output only JSON."
+        "Read the 2-line MRZ; decode per ICAO-9303 for "
+        "type,countryCode(3),passportNumber,nationality,fullName,dateOfBirth,sex,dateOfExpiry."
+        "From the visual zone get placeOfBirth,dateOfIssue,issuedBy,authority."
+        "Use null if a field is unreadable."
+        "Date format: DD MMM YYYY."
+        "Return ONLY JSON with keys "
+        "type,countryCode,passportNumber,fullName,placeOfBirth,nationalId,"
+        "dateOfBirth,sex,dateOfIssue,dateOfExpiry,issuedBy,authority."
     ),
 
     "cash_deposit": (
