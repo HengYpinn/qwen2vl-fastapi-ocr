@@ -21,6 +21,6 @@ PROMPTS = {
     ),
 
     "bank_transfer": (
-        "Extract JSON with keys status,date,time,amount,referenceCode,toName,toBank,toAccountLast4,transferType,remarks from bank-transfer receipt.Output only JSON."
+            "Return *only* JSON with keys: status, date, time, amount, referenceCode, toName, toBank, toAccNo, transferType, remarks. Missing values ⇒ null. Strictly no extra keys, only English for keys.JSON only."
     ),
 }
