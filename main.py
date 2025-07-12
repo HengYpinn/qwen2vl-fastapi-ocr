@@ -200,7 +200,7 @@ def list_documents():
             "document_id": str(d["_id"]),
             "filename": d["filename"],
             "upload_time": d["upload_time"],
-            "preview": d["results"][:1]  # show first entry only
+            "preview": d.get("results", [])[:1]  # show first entry only, or empty list if missing
         })
     return out
 
