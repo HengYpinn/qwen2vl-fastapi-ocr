@@ -21,6 +21,6 @@ PROMPTS = {
     ),
 
     "bank_transfer": (
-            "Return *only* JSON with keys: status, date, time, amount, referenceCode, toName, toBank, toAccNo, transferType, remarks. Missing values ⇒ null. Strictly no extra keys, only English for keys.JSON only."
+            "Return *only* JSON with 10 keys: status, date, time, amount, referenceCode, toName, toBank, toAccNo, transferType, remarks. Missing values ⇒ null. Strictly no extra keys, only English for keys.JSON only."
     ),
 }
