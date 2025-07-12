@@ -1,12 +1,12 @@
-fastapi
-uvicorn[standard]
-pillow
-pdf2image
-pymongo
-numpy
-torch
-transformers @ git+https://github.com/huggingface/transformers
-accelerate @ git+https://github.com/huggingface/accelerate
-qwen-vl-utils
-python-multipart
-opencv-python-headless
+accelerate==1.9.0.dev0
+fastapi==0.116.1
+numpy==1.26.0
+opencv-python-headless==4.11.0.86
+pdf2image==1.17.0
+pillow==9.4.0
+pymongo==4.13.2
+python-multipart==0.0.20
+qwen-vl-utils==0.0.11
+torch==2.1.0
+transformers==4.54.0.dev0
+uvicorn==0.35.0
