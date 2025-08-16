@@ -7,12 +7,12 @@ PROMPTS = {
 
     "passport": (
         "Read the 2-line MRZ; decode per ICAO-9303 for "
-        "type,countryCode(3),passportNumber,nationality,fullName,dateOfBirth,sex,dateOfExpiry."
+        "type,countryCode(3),passportNumber,nationality,fullName,lastName,firstName,dateOfBirth,sex,dateOfExpiry."
         "From the visual zone get placeOfBirth,dateOfIssue,issuedBy,authority."
         "Use null if a field is unreadable."
         "Date format: DD MMM YYYY."
         "Return ONLY JSON with keys "
-        "type,countryCode,passportNumber,fullName,placeOfBirth,nationalId,"
+        "type,countryCode,passportNumber,fullName,lastName,firstName,placeOfBirth,nationalId,"
         "dateOfBirth,sex,dateOfIssue,dateOfExpiry,issuedBy,authority."
     ),
 
@@ -21,6 +21,14 @@ PROMPTS = {
     ),
 
     "bank_transfer": (
-            "Return *only* JSON with 10 keys: status, date, time, amount, referenceCode, toName, toBank, toAccNo, transferType, remarks. Missing values ⇒ null. Strictly no extra keys, only English for keys.JSON only."
+        "Return only JSON with 10 keys: status, date, time, amount, referenceCode, toName, toBank, toAccNo, transferType, remarks. Missing values ⇒ null. Strictly no extra keys, only English for keys.JSON only."
+    ),
+
+    "ssm_form_d": (
+        "Extract JSON with keys companyName,registrationNumber,oldRegistrationNumber,registrationDate,principalPlaceOfBusiness,branchAddress.Output only JSON."
+    ),
+
+    "utility_bill": (
+        "Extract JSON with keys customerName,customerAddress.Output only JSON."
     ),
 }

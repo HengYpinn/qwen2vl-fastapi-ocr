@@ -8,6 +8,7 @@ from pymongo import MongoClient
 from qwen_infer import extract_info_from_image
 from utils.image_quality import compute_blur_intensity, compute_glare_intensity
 from utils.pdf_utils import convert_pdf_to_images
+from utils.passport_utils import normalize_passport_number
 from prompts import PROMPTS
 app = FastAPI()
 
@@ -57,6 +58,20 @@ def handle_inference(contents: bytes, prompt_key: str):
         blur = compute_blur_intensity(img)
         glare = compute_glare_intensity(img)
         data.update({"blurIntensity": blur, "glareIntensity": glare})
+        
+        # Apply post-processing for passport documents
+        if prompt_key == "passport":
+            # Apply passport number normalization (belt-and-suspenders sanitizer)
+            # The Qwen2-VL model may return extra information in the passport number
+            # field, so we normalize it according to ICAO standards
+            if "passportNumber" in data:
+                passport_num = data.get("passportNumber")
+                if passport_num:  # Only normalize if not None/empty
+                    data["passportNumber"] = normalize_passport_number(
+                        str(passport_num), 
+                        data.get("countryCode")
+                    )
+        
         if len(images) > 1:
             results.append({"page": idx + 1, "data": data})
         else:
@@ -176,6 +191,64 @@ async def extract_bank_transfer(file: UploadFile = File(...)):
         f.write(contents)
 
     results = handle_inference(contents, "bank_transfer")
+
+    record = {
+        "filename": saved_name,
+        "file_path": saved_path,
+        "content_type": file.content_type,
+        "results": results,
+        "upload_time": datetime.now(),
+    }
+    doc_id = collection.insert_one(record).inserted_id
+
+    return JSONResponse({"status": "success", "document_id": str(doc_id), "results": results})
+
+@app.post("/api/ssm-form-d")
+async def extract_ssm_form_d(file: UploadFile = File(...)):
+    """
+    Extract fields from SSM Form D (Malaysia company registration).
+    """
+    ext = os.path.splitext(file.filename.lower())[1]
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(400, "Unsupported file type.")
+    contents = await file.read()
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    saved_name = f"{timestamp}_{file.filename}"
+    saved_path = os.path.join(UPLOAD_DIR, saved_name)
+    with open(saved_path, "wb") as f:
+        f.write(contents)
+
+    results = handle_inference(contents, "ssm_form_d")
+
+    record = {
+        "filename": saved_name,
+        "file_path": saved_path,
+        "content_type": file.content_type,
+        "results": results,
+        "upload_time": datetime.now(),
+    }
+    doc_id = collection.insert_one(record).inserted_id
+
+    return JSONResponse({"status": "success", "document_id": str(doc_id), "results": results})
+
+@app.post("/api/utility-bill")
+async def extract_utility_bill(file: UploadFile = File(...)):
+    """
+    Extract fields from Malaysia utility bills (Water Bill, Indah Water, Broadband Internet).
+    """
+    ext = os.path.splitext(file.filename.lower())[1]
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(400, "Unsupported file type.")
+    contents = await file.read()
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    saved_name = f"{timestamp}_{file.filename}"
+    saved_path = os.path.join(UPLOAD_DIR, saved_name)
+    with open(saved_path, "wb") as f:
+        f.write(contents)
+
+    results = handle_inference(contents, "utility_bill")
 
     record = {
         "filename": saved_name,
