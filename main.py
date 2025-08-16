@@ -9,6 +9,7 @@ from qwen_infer import extract_info_from_image
 from utils.image_quality import compute_blur_intensity, compute_glare_intensity
 from utils.pdf_utils import convert_pdf_to_images
 from utils.passport_utils import normalize_passport_number
+from utils.ssm_utils import normalize_ssm_registration_numbers
 from prompts import PROMPTS
 app = FastAPI()
 
@@ -71,6 +72,13 @@ def handle_inference(contents: bytes, prompt_key: str):
                         str(passport_num), 
                         data.get("countryCode")
                     )
+        
+        # Apply post-processing for SSM Form D documents
+        elif prompt_key == "ssm_form_d":
+            # Apply SSM registration number normalization (belt-and-suspenders sanitizer)
+            # The Qwen2-VL model may return combined registration numbers that need splitting
+            # Example: "201934234321 (RT0069300-M)" should be split into separate fields
+            data = normalize_ssm_registration_numbers(data)
         
         if len(images) > 1:
             results.append({"page": idx + 1, "data": data})
