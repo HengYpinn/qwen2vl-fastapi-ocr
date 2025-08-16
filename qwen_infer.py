@@ -8,7 +8,7 @@ from qwen_vl_utils import process_vision_info
 warnings.filterwarnings("ignore")
 
 # 1) Load processor + full-precision model
-processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct", use_fast=True)
 model = Qwen2VLForConditionalGeneration.from_pretrained(
     "Qwen/Qwen2-VL-2B-Instruct",
     device_map="auto"
