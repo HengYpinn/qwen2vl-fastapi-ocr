@@ -2,7 +2,7 @@
 
 PROMPTS = {
     "ic": (
-        "Extract JSON with keys cardType(MyKad,MyPR,MyKAS,MyTentera,MyKid),idNumber,name,address,status,isIslam,gender,expiryDate from Malaysian IC image.expiryDate format DD-MM-YYYY.Output only JSON."
+        "Extract JSON with keys: cardType(MyKad,MyPR,MyKAS,MyTentera,MyKid),idNumber,name,status,isIslam,gender,expiryDate,addressRaw,address.addressRaw = full address text exactly as printed (no omissions, no translation).address = {houseNumber,street,locality,postcode,city,state}.If a field is missing on the card, set null. Do not guess.Return ONLY JSON. Date format DD-MM-YYYY."
     ),
 
     "passport": (
