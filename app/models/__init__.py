@@ -5,6 +5,7 @@ from .document import (
     ProcessingResult,
     DocumentResponse,
     DocumentListItem,
+    DocumentListResponse,
     UploadRequest,
     PyObjectId
 )
@@ -15,6 +16,7 @@ __all__ = [
     "ProcessingResult", 
     "DocumentResponse",
     "DocumentListItem",
+    "DocumentListResponse",
     "UploadRequest",
     "PyObjectId",
     "DocumentType",

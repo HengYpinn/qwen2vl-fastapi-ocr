@@ -1,44 +1,49 @@
-"""Data models for the application."""
-
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 from bson import ObjectId
 
 
 class PyObjectId(ObjectId):
-    """Custom ObjectId for Pydantic models."""
+    """Custom ObjectId type for Pydantic v2"""
     
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(cls, source_type, handler):
+        from pydantic_core import core_schema
+        return core_schema.with_info_plain_validator_function(
+            cls.validate,
+            serialization=core_schema.to_string_ser_schema(),
+        )
     
     @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
+    def validate(cls, v, info=None):
+        if isinstance(v, ObjectId):
+            return v
+        if isinstance(v, str):
+            if ObjectId.is_valid(v):
+                return ObjectId(v)
+            raise ValueError(f"Invalid ObjectId: {v}")
+        raise ValueError(f"Invalid ObjectId type: {type(v)}")
     
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+    def __str__(self):
+        return str(super())
 
 
 class DocumentRecord(BaseModel):
-    """Document record model."""
+    """Document record stored in MongoDB"""
     
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    id: Optional[PyObjectId] = Field(default=None, alias="_id")
     filename: str
     file_path: str
     content_type: str
     document_type: str
     results: List[Dict[str, Any]]
-    upload_time: datetime = Field(default_factory=datetime.now)
+    upload_time: datetime
     
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
 
 
 class ProcessingResult(BaseModel):
@@ -51,7 +56,7 @@ class ProcessingResult(BaseModel):
 
 
 class DocumentResponse(BaseModel):
-    """API response for document processing."""
+    """API response for document processing"""
     
     status: str
     document_id: str
@@ -72,3 +77,12 @@ class UploadRequest(BaseModel):
     
     file_size: Optional[int] = None
     content_type: Optional[str] = None
+
+
+class DocumentListResponse(BaseModel):
+    """API response for document listing"""
+    
+    documents: List[DocumentRecord]
+    total: int
+    page: int
+    page_size: int
