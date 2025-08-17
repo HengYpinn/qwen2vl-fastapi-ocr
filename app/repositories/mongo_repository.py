@@ -24,7 +24,7 @@ class MongoDocumentRepository(IDocumentRepository):
         """Save a document record and return its ID."""
         try:
             # Convert to dict and handle ObjectId
-            doc_dict = record.dict(by_alias=True, exclude_unset=True)
+            doc_dict = record.model_dump(by_alias=True, exclude_unset=True)
             if "_id" in doc_dict and doc_dict["_id"] is None:
                 doc_dict.pop("_id")
             
@@ -43,7 +43,7 @@ class MongoDocumentRepository(IDocumentRepository):
             
             doc = self._collection.find_one({"_id": ObjectId(document_id)})
             if doc:
-                return DocumentRecord(**doc)
+                return DocumentRecord.model_validate(doc)
             return None
         except Exception as e:
             logger.error(f"Failed to find document {document_id}: {e}")
@@ -55,7 +55,7 @@ class MongoDocumentRepository(IDocumentRepository):
             cursor = self._collection.find().sort("upload_time", -1).skip(skip).limit(limit)
             documents = []
             for doc in cursor:
-                documents.append(DocumentRecord(**doc))
+                documents.append(DocumentRecord.model_validate(doc))
             return documents
         except Exception as e:
             logger.error(f"Failed to find documents: {e}")
