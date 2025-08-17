@@ -2,7 +2,17 @@
 
 PROMPTS = {
     "ic": (
-        "Extract JSON with keys cardType(MyKad,MyPR,MyKAS,MyTentera,MyKid),idNumber,name,fullAddress,status,isIslam,gender,expiryDate(if shown) from Malaysian IC image.expiryDate format DD-MM-YYYY.Output only JSON."
+        "Extract ONLY JSON with keys:"
+        "cardType,idNumber,name,status,isIslam,gender,expiryDate,addressRaw,address."
+        "addressRaw = full address as printed (no omissions, no translation)."
+        "address = {houseNumber,street,locality,postcode,city,state}."
+        ""
+        "Rules:"
+        "- Preserve prefixes/suffixes in houseNumber (e.g., \"No 8\", \"No. 3A-1\", \"Lot 12A\")."
+        "- If a field isn't printed, set null; never guess."
+        "- For MyKad, set expiryDate=null unless an expiry is explicitly printed; do not infer status."
+        ""
+        "Date format: DD-MM-YYYY."
     ),
 
     "passport": (
