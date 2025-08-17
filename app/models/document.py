@@ -38,7 +38,7 @@ class DocumentRecord(BaseModel):
     content_type: str
     document_type: str
     results: List[Dict[str, Any]]
-    upload_time: datetime
+    upload_time: datetime = Field(default_factory=datetime.now)
     
     model_config = {
         "populate_by_name": True,

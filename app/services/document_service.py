@@ -1,5 +1,6 @@
 """Main document processing service."""
 
+from datetime import datetime
 from typing import List
 from fastapi import UploadFile
 from app.core.exceptions import UnsupportedFileTypeError
@@ -63,7 +64,8 @@ class DocumentService:
             file_path=saved_path,
             content_type=file.content_type,
             document_type=document_type.value,
-            results=results_dict
+            results=results_dict,
+            upload_time=datetime.now()
         )
         
         # Save to database
