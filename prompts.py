@@ -2,30 +2,7 @@
 
 PROMPTS = {
     "ic": (
-        "Extract ONLY JSON with keys:"
-        "cardType,idNumber,name,status,isIslam,gender,expiryDate,addressRaw,address."
-        "address = {houseNumber,street,locality,postcode,city,state}. Date format DD-MM-YYYY."
-        ""
-        "Rules (critical):"
-        "1) idNumber must match \\d{6}-\\d{2}-\\d{4}. If not visible, set null."
-        "2) cardType ∈ {MyKad,MyPR,MyKAS,MyTentera,MyKid}. "
-        "   Do NOT use headers like \"KAD PENGENALAN MALAYSIA\" as cardType."
-        "   If uncertain, set null."
-        "3) name = the person's name near the portrait (may include BIN/BINTI/A/L/A/P). "
-        "   Never use words like WARGANEGARA, LELAKI, PEREMPUAN, MALAYSIA, MyKad as name."
-        "4) gender: map LELAKI→Male, PEREMPUAN→Female. If not printed, null."
-        "5) status: if the word WARGANEGARA appears, set \"Citizen\"; else null."
-        "6) isIslam: true only if the word ISLAM is printed on the card; else false if a different religion is printed; null if not shown."
-        "7) expiryDate: set null unless an explicit expiry date is printed on the IC."
-        "8) Address:"
-        "   - addressRaw = the full address block exactly as printed (preserve tokens like \"No\", \"Lot\", \"Jalan\", \"Taman\"), join lines with commas, no translation."
-        "   - Parse address into components; if a component is missing, set null. "
-        "   - houseNumber must include prefixes if printed (e.g., \"No 1\", \"Lot 12A\")."
-        "   - postcode = 5 digits when present."
-        "   - Prefer the lower-left text block for the address; include vertical lines if used."
-        "9) Never invent or infer text. If unreadable, return null for that field."
-        ""
-        "Return only the JSON object."
+        "Extract JSON with keys cardType(MyKad,MyPR,MyKAS,MyTentera,MyKid),idNumber,name,address,status,isIslam,gender,expiryDate from Malaysian IC image.expiryDate format DD-MM-YYYY.Output only JSON."
     ),
 
     "passport": (
