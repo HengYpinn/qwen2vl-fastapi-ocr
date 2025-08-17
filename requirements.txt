@@ -1,5 +1,5 @@
 accelerate==0.28.0
-fastapi==0.99.1
+fastapi==0.110.0
 numpy==1.26.0
 opencv-python-headless==4.11.0.86
 pdf2image==1.17.0
