@@ -36,7 +36,7 @@ class DocumentRecord(BaseModel):
     filename: str
     file_path: str
     content_type: str
-    document_type: str
+    document_type: Optional[str] = None
     results: List[Dict[str, Any]]
     upload_time: datetime = Field(default_factory=datetime.now)
     
